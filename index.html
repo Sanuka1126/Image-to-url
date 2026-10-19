@@ -1,144 +1,55 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Image to URL - Short URL</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Image to URL - Koata URL</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
-body{
-  min-height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:#000 url('bg.jpg') no-repeat center center / cover;
-  position:relative;
-}
-body::before{
-  content:'';
-  position:absolute;
-  inset:0;
-  background:rgba(0,0,0,0.6);
-  backdrop-filter: blur(2px);
-}
-.container{
-  position:relative;z-index:2;
-  width:92%;max-width:430px;
-  background:rgba(18,18,18,0.9);
-  border:1px solid rgba(255,255,255,0.15);
-  border-radius:20px;
-  padding:26px;
-  color:#fff;text-align:center;
-  box-shadow:0 20px 60px rgba(0,0,0,0.9);
-}
-h1{font-size:22px}
-.sub{color:#aaa;font-size:13px;margin:8px 0 20px}
-.upload{
-  border:2px dashed #666;
-  border-radius:14px;
-  padding:28px;
-  cursor:pointer;
-  display:block;
-  background:rgba(255,255,255,0.05);
-  transition:.2s;
-}
-.upload:hover{border-color:#fff;background:rgba(255,255,255,0.1)}
-.upload.dragover{border-color:#4af;background:rgba(74, 175, 255, 0.1)}
-#preview{width:100%;margin-top:14px;border-radius:12px;display:none;max-height:250px;object-fit:contain}
-.result{margin-top:16px;display:none}
-.result input{
-  width:100%;padding:12px;
-  border-radius:10px;
-  border:1px solid #333;
-  background:#111;
-  color:#2f2;
-  font-size:13px;
-  text-align:center;
-}
-.btn{
-  margin-top:10px;
-  width:100%;
-  padding:12px;
-  border:none;
-  border-radius:10px;
-  background:#fff;
-  color:#000;
-  font-weight:700;
-  cursor:pointer;
-}
-.btn:active{transform:scale(0.98)}
-.loading{margin-top:15px;color:#4af;display:none}
+*{margin:0;padding:0;box-sizing:border-box}
+body{min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:system-ui;background:#000 url('bg.jpg') center/cover no-repeat fixed;position:relative}
+body::before{content:'';position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:0}
+.card{position:relative;z-index:1;width:92%;max-width:420px;background:rgba(15,15,15,0.85);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:28px;text-align:center;box-shadow:0 20px 40px rgba(0,0,0,0.6)}
+h1{color:#fff;font-size:26px;margin-bottom:4px} .sub{color:#aaa;font-size:14px;margin-bottom:20px}
+.drop{border:2px dashed rgba(255,255,255,0.25);border-radius:14px;padding:30px 15px;cursor:pointer;transition:.2s;color:#ddd}
+.drop:hover{border-color:#fff;background:rgba(255,255,255,0.05)}
+.drop.dragover{border-color:#7c3aed;background:rgba(124,58,237,0.15)}
+#preview{width:100%;max-height:220px;object-fit:contain;border-radius:10px;margin-top:15px;display:none}
+.result{margin-top:18px;background:rgba(0,0,0,0.6);border-radius:10px;padding:14px;display:none;text-align:left}
+.result label{color:#aaa;font-size:12px} .url-box{display:flex;gap:8px;margin-top:6px}
+.url-box input{flex:1;background:#111;border:1px solid #333;color:#7c3aed;border-radius:8px;padding:10px;font-size:13px}
+.btn{background:#fff;color:#000;border:0;border-radius:8px;padding:10px 16px;font-weight:700;cursor:pointer}
+.btn:active{transform:scale(0.97)} .status{margin-top:12px;color:#fbbf24;font-size:13px}
 </style>
 </head>
 <body>
-<div class="container">
-<h1>Image to URL</h1>
-<p class="sub">Koata URL ekak hadamu 🔥</p>
-<label class="upload" id="dropArea" for="f">
-  <div id="uploadText">📁 Image eka daganna<br><small style="color:#888">Click karanna</small></div>
-  <input type="file" id="f" hidden accept="image/*">
-</label>
-<img id="preview">
-<div class="loading" id="loading">⏳ Upload wenawa...</div>
-<div class="result" id="r">
-  <input id="u" readonly>
-  <button class="btn" id="c">Copy URL</button>
-  <button class="btn" style="background:#111;color:#fff;border:1px solid #333" id="open">Open Link</button>
-</div>
+<div class="card">
+<h1>Image to URL</h1><p class="sub">Koata URL ekak hadamu 🔥</p>
+<div class="drop" id="drop"><span id="dropText">📸 Photo ekak danna / Click karanna</span><input type="file" id="file" accept="image/*" hidden><img id="preview"></div>
+<div class="status" id="status"></div>
+<div class="result" id="result"><label>Koata URL eka 👇</label><div class="url-box"><input id="url" readonly><button class="btn" onclick="copyUrl()">Copy</button></div></div>
 </div>
 <script>
-const f=document.getElementById('f'), preview=document.getElementById('preview'), r=document.getElementById('r'), u=document.getElementById('u'), c=document.getElementById('c'), loading=document.getElementById('loading'), uploadText=document.getElementById('uploadText'), dropArea=document.getElementById('dropArea');
-
-async function uploadFile(file){
-  if(!file) return;
-  // Preview
-  let rd=new FileReader();
-  rd.onload=e=>{ preview.src=e.target.result; preview.style.display='block'; }
-  rd.readAsDataURL(file);
-
-  loading.style.display='block';
-  r.style.display='none';
-  uploadText.innerHTML='⏳ Upload wenawa...';
-
-  let form=new FormData();
-  form.append('reqtype','fileupload');
-  form.append('fileToUpload',file);
-
-  try{
-    let res=await fetch('https://catbox.moe/user/api.php',{method:'POST',body:form});
-    let url=await res.text();
-    loading.style.display='none';
-    if(url.startsWith('https://')){
-      u.value=url.trim();
-      r.style.display='block';
-      uploadText.innerHTML='✅ Done! Thawa ekak danna';
-    }else{
-      uploadText.innerHTML='❌ Error, ayeth try karanna';
-      alert('Upload failed: '+url);
-    }
-  }catch(err){
-    loading.style.display='none';
-    uploadText.innerHTML='❌ Internet error';
-    alert('Error: '+err);
-  }
+const drop=document.getElementById('drop'), fileInput=document.getElementById('file'), preview=document.getElementById('preview'), dropText=document.getElementById('dropText'), status=document.getElementById('status'), result=document.getElementById('result'), urlInput=document.getElementById('url');
+drop.addEventListener('click',()=>fileInput.click());
+drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('dragover')});
+drop.addEventListener('dragleave',()=>drop.classList.remove('dragover'));
+drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('dragover');if(e.dataTransfer.files[0])handle(e.dataTransfer.files[0])});
+fileInput.addEventListener('change',e=>{if(e.target.files[0])handle(e.target.files[0])});
+async function handle(file){
+ preview.src=URL.createObjectURL(file); preview.style.display='block'; dropText.style.display='none';
+ status.textContent='⏳ Upload wenawa...'; result.style.display='none';
+ const form=new FormData(); form.append('reqtype','fileupload'); form.append('fileToUpload',file);
+ try{
+  // Use CORS proxy to bypass Catbox block
+  const res=await fetch('https://corsproxy.io/?https://catbox.moe/user/api.php',{method:'POST',body:form});
+  const text=await res.text();
+  if(text.startsWith('https://')){ urlInput.value=text.trim(); result.style.display='block'; status.textContent='✅ Koata URL eka hadala!'; }
+  else throw new Error(text);
+ }catch(err){
+  status.textContent='❌ Error: '+err.message+' - ayeth try karanna';
+  console.error(err);
+ }
 }
-
-f.onchange=e=>uploadFile(e.target.files[0]);
-
-// Drag & Drop
-dropArea.addEventListener('dragover',e=>{e.preventDefault();dropArea.classList.add('dragover')});
-dropArea.addEventListener('dragleave',()=>dropArea.classList.remove('dragover'));
-dropArea.addEventListener('drop',e=>{
-  e.preventDefault();
-  dropArea.classList.remove('dragover');
-  uploadFile(e.dataTransfer.files[0]);
-});
-
-c.onclick=()=>{
-  u.select();navigator.clipboard.writeText(u.value);
-  c.textContent='Copied! ✅';setTimeout(()=>c.textContent='Copy URL',1500);
-}
-document.getElementById('open').onclick=()=>window.open(u.value,'_blank');
+function copyUrl(){ urlInput.select(); document.execCommand('copy'); status.textContent='📋 Copy kala!'; }
 </script>
 </body>
   </html>
