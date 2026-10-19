@@ -1,55 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Image to URL - Koata URL</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:system-ui;background:#000 url('bg.jpg') center/cover no-repeat fixed;position:relative}
-body::before{content:'';position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:0}
-.card{position:relative;z-index:1;width:92%;max-width:420px;background:rgba(15,15,15,0.85);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:28px;text-align:center;box-shadow:0 20px 40px rgba(0,0,0,0.6)}
-h1{color:#fff;font-size:26px;margin-bottom:4px} .sub{color:#aaa;font-size:14px;margin-bottom:20px}
-.drop{border:2px dashed rgba(255,255,255,0.25);border-radius:14px;padding:30px 15px;cursor:pointer;transition:.2s;color:#ddd}
-.drop:hover{border-color:#fff;background:rgba(255,255,255,0.05)}
-.drop.dragover{border-color:#7c3aed;background:rgba(124,58,237,0.15)}
-#preview{width:100%;max-height:220px;object-fit:contain;border-radius:10px;margin-top:15px;display:none}
-.result{margin-top:18px;background:rgba(0,0,0,0.6);border-radius:10px;padding:14px;display:none;text-align:left}
-.result label{color:#aaa;font-size:12px} .url-box{display:flex;gap:8px;margin-top:6px}
-.url-box input{flex:1;background:#111;border:1px solid #333;color:#7c3aed;border-radius:8px;padding:10px;font-size:13px}
-.btn{background:#fff;color:#000;border:0;border-radius:8px;padding:10px 16px;font-weight:700;cursor:pointer}
-.btn:active{transform:scale(0.97)} .status{margin-top:12px;color:#fbbf24;font-size:13px}
-</style>
-</head>
-<body>
-<div class="card">
-<h1>Image to URL</h1><p class="sub">Koata URL ekak hadamu 🔥</p>
-<div class="drop" id="drop"><span id="dropText">📸 Photo ekak danna / Click karanna</span><input type="file" id="file" accept="image/*" hidden><img id="preview"></div>
-<div class="status" id="status"></div>
-<div class="result" id="result"><label>Koata URL eka 👇</label><div class="url-box"><input id="url" readonly><button class="btn" onclick="copyUrl()">Copy</button></div></div>
-</div>
-<script>
-const drop=document.getElementById('drop'), fileInput=document.getElementById('file'), preview=document.getElementById('preview'), dropText=document.getElementById('dropText'), status=document.getElementById('status'), result=document.getElementById('result'), urlInput=document.getElementById('url');
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Image to URL</title><style>*{margin:0;padding:0;box-sizing:border-box}body{min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:system-ui;background:#000 url('bg.jpg') center/cover no-repeat fixed;position:relative}body::before{content:'';position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:0}.card{position:relative;z-index:1;width:92%;max-width:420px;background:rgba(15,15,15,.9);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:28px;text-align:center}h1{color:#fff;font-size:26px}.sub{color:#aaa;font-size:14px;margin:6px 0 20px}.drop{border:2px dashed rgba(255,255,255,.25);border-radius:14px;padding:30px 15px;cursor:pointer;color:#ddd}.drop:hover{border-color:#fff}#preview{width:100%;max-height:220px;object-fit:contain;border-radius:10px;margin-top:15px;display:none}.result{margin-top:18px;background:rgba(0,0,0,.6);border-radius:10px;padding:14px;display:none;text-align:left}.url-box{display:flex;gap:8px;margin-top:6px}.url-box input{flex:1;background:#111;border:1px solid #333;color:#a78bfa;border-radius:8px;padding:10px;font-size:13px}.btn{background:#fff;color:#000;border:0;border-radius:8px;padding:10px 16px;font-weight:700;cursor:pointer}.status{margin-top:12px;color:#fbbf24;font-size:13px;word-break:break-all}</style></head><body><div class="card"><h1>Image to URL</h1><p class="sub">Koata URL ekak hadamu 🔥</p><div class="drop" id="drop"><span id="dropText">📸 Photo ekak danna / Click karanna</span><input type="file" id="file" accept="image/*" hidden><img id="preview"></div><div class="status" id="status"></div><div class="result" id="result"><label style="color:#aaa;font-size:12px">Koata URL eka 👇</label><div class="url-box"><input id="url" readonly><button class="btn" onclick="copyUrl()">Copy</button></div></div></div><script>
+const drop=document.getElementById('drop'),fileInput=document.getElementById('file'),preview=document.getElementById('preview'),dropText=document.getElementById('dropText'),status=document.getElementById('status'),result=document.getElementById('result'),urlInput=document.getElementById('url');
 drop.addEventListener('click',()=>fileInput.click());
-drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('dragover')});
-drop.addEventListener('dragleave',()=>drop.classList.remove('dragover'));
-drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('dragover');if(e.dataTransfer.files[0])handle(e.dataTransfer.files[0])});
 fileInput.addEventListener('change',e=>{if(e.target.files[0])handle(e.target.files[0])});
 async function handle(file){
- preview.src=URL.createObjectURL(file); preview.style.display='block'; dropText.style.display='none';
- status.textContent='⏳ Upload wenawa...'; result.style.display='none';
- const form=new FormData(); form.append('reqtype','fileupload'); form.append('fileToUpload',file);
+ preview.src=URL.createObjectURL(file);preview.style.display='block';dropText.style.display='none';status.textContent='⏳ Upload wenawa...';result.style.display='none';
+ const fd=new FormData();fd.append('file',file);
  try{
-  // Use CORS proxy to bypass Catbox block
-  const res=await fetch('https://corsproxy.io/?https://catbox.moe/user/api.php',{method:'POST',body:form});
-  const text=await res.text();
-  if(text.startsWith('https://')){ urlInput.value=text.trim(); result.style.display='block'; status.textContent='✅ Koata URL eka hadala!'; }
-  else throw new Error(text);
- }catch(err){
-  status.textContent='❌ Error: '+err.message+' - ayeth try karanna';
-  console.error(err);
- }
+  const r=await fetch('https://0x0.st',{method:'POST',body:fd});
+  const t=(await r.text()).trim();
+  if(t.startsWith('https://')){urlInput.value=t;result.style.display='block';status.textContent='✅ Hadala! URL eka copy karanna';}
+  else throw new Error(t);
+ }catch(e){status.textContent='❌ Error: '+e.message}
 }
-function copyUrl(){ urlInput.select(); document.execCommand('copy'); status.textContent='📋 Copy kala!'; }
-</script>
-</body>
-  </html>
+function copyUrl(){urlInput.select();navigator.clipboard.writeText(urlInput.value);status.textContent='📋 Copy kala!';}
+</script></body></html>
